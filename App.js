@@ -1,21 +1,39 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState } from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import AppNavigator from "./navigation/AppNavigator";
+import APIService from "./services/APIService";
+import { Provider } from "react-redux";
+import { createStore } from "redux";
+import reducer from './store/reducer';
+import * as Fonts from "expo-font";
+import AppLoading from "expo-app-loading";
+
+const fetchFonts = () => {
+    return Fonts.loadAsync({
+        "sf-400": require("./assets/fonts/SFUIDisplay-Regular.ttf"),
+        "sf-500": require("./assets/fonts/SFUIDisplay-Medium.ttf"),
+        "sf-600": require("./assets/fonts/SF-UI-Display-Semibold.ttf"),
+        "sf-900": require("./assets/fonts/SFUIDisplay-Black.ttf"),
+    });
+};
+
+const store = createStore(reducer);
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+    const [dataLoaded, setDataLoaded] = useState(false);
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+    if (!dataLoaded) {
+        return (
+            <AppLoading startAsync={fetchFonts} onFinish={() => setDataLoaded(true)} onError={(e) => console.log(e)} />
+        );
+    }
+
+    return (
+        <Provider store={store}>
+            <NavigationContainer>
+                <APIService />
+                <AppNavigator />
+            </NavigationContainer>
+        </Provider>
+    );
+}
